@@ -130,20 +130,44 @@ p.danger {
 /************ File Uploader Css ************/
 
 .file-uploader-container {
-  width: 25%;
+  width: 35%;
   margin: auto;
-  font-family: Arial, sans-serif;
-  /*border: 1px red solid;*/
+  font-family: Hind, sans-serif;
+  font-size: 22px;
+  /*border: 1px deepskyblue solid;*/
+}
+
+.max-size-text {
+  font-size: 16px;
 }
 
 .drag-area {
+  position: relative;
   padding: 20px;
-  /*border: 2px dashed red;*/
+  cursor: pointer;
+  border: 2px dashed #CACACA;
+  background-clip: padding-box;
+  background-image: linear-gradient(gray 45deg, gray 45deg), linear-gradient(gray 135deg, gray 135deg), linear-gradient(gray -45deg, gray -45deg), linear-gradient(gray -135deg, gray -135deg);
+  background-size: 1px 100%, 100% 1px, 1px 100%, 100% 1px;
+  background-position: 0 0, 0 0, 100% 0, 0 100%;
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
   color: #888;
   text-align: center;
   margin-bottom: 20px;
-  cursor: pointer;
-  /*background-color: #f9f9f9;*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: border 0.3s ease; /* Smooth transition for hover */
+}
+
+.drag-area:hover {
+  border: 2px solid #CACACA;
+}
+
+.purple-tag {
+  color: #805DAB;
 }
 
 .file-list {
