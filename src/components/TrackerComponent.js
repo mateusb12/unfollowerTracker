@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import upload_icon from "../assets/img/upload-icon.svg";
+import html_icon from "../assets/img/html.svg";
 
 const UnfollowerTracker = () => {
     const [files, setFiles] = useState([]);
@@ -29,6 +31,7 @@ const UnfollowerTracker = () => {
             </div>
             <div {...getRootProps()} className="uploadArea">
                 <input {...getInputProps()} />
+                <img src={html_icon} alt="HTML Icon" style={{width: '60px', height: '60px'}}/>
                 <p>Click to Upload or drag and drop (Max. File size: 25 MB)</p>
             </div>
             <div className="fileList">
