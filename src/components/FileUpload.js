@@ -1,5 +1,36 @@
 import React, { useState, useCallback, useEffect } from 'react';
 
+const containerStyle = {
+    width: '35%',
+    margin: 'auto',
+    fontFamily: 'Hind, sans-serif',
+    fontSize: '22px'
+};
+
+const purpleTagStyle = {
+    color: '#805DAB'
+};
+
+const maxSizeTextStyle = {
+    fontSize: '16px'
+};
+
+const fileEntryStyle = {
+    backgroundColor: '#f0f0f0',
+    padding: '10px',
+    marginBottom: '10px'
+};
+
+const fileEntryTextStyle = {
+    margin: '5px 0',
+    color: '#333'
+};
+
+const progressStyle = {
+    width: '100%',
+    height: '20px'
+};
+
 // Utility function to format bytes
 const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
@@ -46,21 +77,28 @@ const FileUpload = () => {
 
     useEffect(() => {
         if (files.length > 0) {
-            files.forEach((file, index) => {
-                if (!file.complete) {
-                    setTimeout(() => {
-                        const newFiles = [...files];
-                        newFiles[index].progress = 100; // Simulate progress to 100%
-                        newFiles[index].complete = true;
-                        setFiles(newFiles);
-                    }, 1000); // Simulate upload time
-                }
-            });
+            const interval = setInterval(() => {
+                setFiles((prevFiles) => {
+                    const updatedFiles = prevFiles.map((file) => {
+                        if (!file.complete && file.progress < 100) {
+                            return {
+                                ...file,
+                                progress: Math.min(file.progress + 10, 100),
+                                complete: file.progress + 10 >= 100,
+                            };
+                        }
+                        return file;
+                    });
+                    return updatedFiles;
+                });
+            }, 200);
+
+            return () => clearInterval(interval);
         }
-    }, [files]);
+    }, [files.length]);
 
     return (
-        <div className="file-uploader-container">
+        <div style={containerStyle}>
             {showDragArea && (
                 <div
                     className="drag-area"
@@ -68,10 +106,10 @@ const FileUpload = () => {
                     onDrop={onFileDrop}
                     onClick={() => document.getElementById('fileInput').click()}
                 >
-                    <div className="purple-upper-label">
-                        <span className="purple-tag">Click to Upload</span> or drag and drop
+                    <div style={purpleTagStyle}>
+                        <span>Click to Upload</span> or drag and drop
                     </div>
-                    <div className="max-size-text">
+                    <div style={maxSizeTextStyle}>
                         (Max. File size: {formatBytes(maxFileSize)})
                     </div>
                 </div>
@@ -81,15 +119,15 @@ const FileUpload = () => {
                 id="fileInput"
                 multiple
                 onChange={onFileChange}
-                style={{ display: 'none' }} // Keep this inline or move to CSS
+                style={{ display: 'none' }}
             />
             {files.map((file, index) => (
-                <div key={index} className="file-entry">
+                <div key={index} style={fileEntryStyle}>
                     {file.progress < 100 && (
-                        <progress value={file.progress} max="100"></progress>
+                        <progress value={file.progress} max="100" style={progressStyle}></progress>
                     )}
                     {file.complete && (
-                        <p>
+                        <p style={fileEntryTextStyle}>
                             <strong>{file.name}</strong> - {formatBytes(file.size)}
                         </p>
                     )}
