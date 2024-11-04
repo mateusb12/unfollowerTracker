@@ -237,6 +237,7 @@ p.danger {
 .title {
   font-size: 24px;
   font-weight: bold;
+  margin-bottom: 1rem;
 }
 
 .carouselIndicator {
@@ -391,4 +392,71 @@ p.danger {
 
 .close-button:hover {
   background-color: #c0392b;
+}
+
+/************ Carousel Css ************/
+
+.simple-carousel {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.carousel-inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.carousel-item {
+  display: none;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-item.active {
+  display: block;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: auto;
+}
+
+.prev-button, .next-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.prev-button {
+  left: 10px;
+}
+
+.next-button {
+  right: 10px;
+}
+
+.dots {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.dot {
+  height: 15px;
+  width: 15px;
+  margin: 0 5px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #717171;
 }

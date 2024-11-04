@@ -3,6 +3,10 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import html_icon from "../assets/img/html.svg";
 import FileUpload from "./FileUpload";
+import SimpleCarousel from "./Carousel"; // Ensure you have appropriate styles
+import slide1 from "../assets/img/slide1.png";
+import slide2 from "../assets/img/slide2.png";
+import slide3 from "../assets/img/slide3.png";
 
 const UnfollowerTracker = () => {
     const [uploadedFile, setUploadedFile] = useState(null);
@@ -23,14 +27,21 @@ const UnfollowerTracker = () => {
         setUploadedFile(null);
     };
 
+    // Dummy images
+    const dummyImages = [
+        slide1,
+        slide2,
+        slide3,
+    ];
+
     return (
         <div className="unfollowerTracker">
             <h1 className="title">Unfollower Tracker</h1>
-            <div className="carouselIndicator">
-                <span className="carouselDot"></span>
-                <span className="carouselDot carouselDotActive"></span>
-                <span className="carouselDot"></span>
-            </div>
+
+            {/* Carousel Section */}
+            <SimpleCarousel images={dummyImages} />
+
+            {/* File Upload Section */}
             <FileUpload onFileUploaded={handleFileUploaded} />
             {uploadedFile && (
                 <div className="uploaded-file-info">
@@ -50,6 +61,10 @@ const UnfollowerTracker = () => {
             </button>
         </div>
     );
+};
+
+UnfollowerTracker.propTypes = {
+    // Define your prop types if any
 };
 
 export default UnfollowerTracker;
