@@ -1,24 +1,26 @@
+// UnfollowerTracker.js
 import React, { useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import upload_icon from "../assets/img/upload-icon.svg";
+import PropTypes from 'prop-types';
 import html_icon from "../assets/img/html.svg";
+import FileUpload from "./FileUpload";
 
 const UnfollowerTracker = () => {
-    const [files, setFiles] = useState([]);
+    const [uploadedFile, setUploadedFile] = useState(null);
 
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop: acceptedFiles => {
-            setFiles(acceptedFiles.map(file => ({
-                ...file,
-                preview: URL.createObjectURL(file)
-            })));
-        },
-        maxSize: 25000000
-    });
+    const handleFileUploaded = (file) => {
+        setUploadedFile(file);
+    };
 
-    const fileUploadProgress = (file) => {
-        // Simulated progress, integrate with actual upload logic
-        return 100; // Assuming files are fully uploaded for display
+    const handleAnalyze = () => {
+        if (uploadedFile && uploadedFile.complete) {
+            // Implement your analysis logic here using uploadedFile
+            console.log('Analyze', uploadedFile);
+            // Example: Send the file to an API for processing
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setUploadedFile(null);
     };
 
     return (
@@ -26,23 +28,24 @@ const UnfollowerTracker = () => {
             <h1 className="title">Unfollower Tracker</h1>
             <div className="carouselIndicator">
                 <span className="carouselDot"></span>
-                <span className={`carouselDot carouselDotActive`}></span>
+                <span className="carouselDot carouselDotActive"></span>
                 <span className="carouselDot"></span>
             </div>
-            <div {...getRootProps()} className="uploadArea">
-                <input {...getInputProps()} />
-                <img src={html_icon} alt="HTML Icon" style={{width: '60px', height: '60px'}}/>
-                <p>Click to Upload or drag and drop (Max. File size: 25 MB)</p>
-            </div>
-            <div className="fileList">
-                {files.map((file, index) => (
-                    <div key={index} className="fileProgress">
-                        <span>{file.name}</span>
-                        <progress value={fileUploadProgress(file)} max="100" className="progressBar"></progress>
-                    </div>
-                ))}
-            </div>
-            <button disabled={files.length === 0} onClick={() => console.log('Analyze')} className="analyzeButton">
+            <FileUpload onFileUploaded={handleFileUploaded} />
+            {uploadedFile && (
+                <div className="uploaded-file-info">
+                    <img src={html_icon} alt="HTML Icon" className="html-icon-small" />
+                    <span className="file-name">{uploadedFile.name}</span>
+                    <button className="remove-button" onClick={handleRemoveFile}>
+                        Remove
+                    </button>
+                </div>
+            )}
+            <button
+                disabled={!uploadedFile || !uploadedFile.complete}
+                onClick={handleAnalyze}
+                className="analyzeButton"
+            >
                 Analyze
             </button>
         </div>

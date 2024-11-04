@@ -2,179 +2,137 @@ import React, { useState, useCallback, useEffect } from 'react';
 import upload_icon from '../assets/img/upload-icon.svg';
 import html_icon from '../assets/img/html.svg';
 
-const containerStyle = {
-    width: '35%',
-    margin: 'auto',
-    fontFamily: 'Hind, sans-serif',
-    fontSize: '22px'
-};
-
-const dragAreaStyle = {
-    position: 'relative',
-    padding: '20px',
-    cursor: 'pointer',
-    border: '2px dashed #CACACA',
-    backgroundClip: 'padding-box',
-    backgroundImage: 'linear-gradient(gray 45deg, gray 45deg), linear-gradient(gray 135deg, gray 135deg), linear-gradient(gray -45deg, gray -45deg), linear-gradient(gray -135deg, gray -135deg)',
-    backgroundSize: '1px 100%, 100% 1px, 1px 100%, 100% 1px',
-    backgroundPosition: '0 0, 0 0, 100% 0, 0 100%',
-    backgroundRepeat: 'repeat-x, repeat-y, repeat-x, repeat-y',
-    color: '#888',
-    textAlign: 'center',
-    marginBottom: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.4rem',
-    transition: 'border 0.3s ease'
-};
-
-const dragAreaHoverStyle = {
-    border: '2px solid #CACACA'
-};
-
-const purpleTagStyle = {
-    color: '#805DAB'
-};
-
-const maxSizeTextStyle = {
-    fontSize: '16px'
-};
-
-const fileEntryStyle = {
-    backgroundColor: '#f0f0f0',
-    padding: '10px',
-    marginBottom: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px'
-};
-
-const fileEntryTextStyle = {
-    margin: '5px 0',
-    color: '#333'
-};
-
-const progressStyle = {
-    width: '100%',
-    height: '20px',
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    MozAppearance: 'none'
-};
-
-const progressColorStyle = {
-    backgroundColor: '#fbfbfb'
-};
-
-const hiddenInputStyle = {
-    display: 'none'
-};
-
-const closeButtonStyle = {
-    cursor: 'pointer',
-    padding: '5px 10px',
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '14px',
-    marginLeft: 'auto'
-};
-
 // Utility function to format bytes
 const formatBytes = (bytes, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = [
+        'Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'
+    ];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const dm = decimals < 0 ? 0 : decimals;
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    return (
+        parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+    );
 };
 
 const maxFileSize = 25 * 1024 * 1024; // Max file size in bytes (25 MB)
-const timePerMB = 1000; // 1 second per MB in milliseconds
-
+const timePerMB = 5000;
 const initialFileProperties = {
     progress: 0,
-    complete: false
+    complete: false,
 };
 
 const FileUpload = () => {
     const [file, setFile] = useState(null);
     const [showDragArea, setShowDragArea] = useState(true);
-    const [isHovered, setIsHovered] = useState(false);
+    const [error, setError] = useState(''); // State for error messages
+
+    // Helper function to validate file type
+    const isHtmlFile = (file) => {
+        const fileType = file.type;
+        const fileName = file.name;
+        return (
+            fileType === 'text/html' ||
+            fileName.toLowerCase().endsWith('.html')
+        );
+    };
 
     const onFileDrop = useCallback((e) => {
         e.preventDefault();
+        setError(''); // Reset any existing errors
         const droppedFile = e.dataTransfer.files[0];
         if (droppedFile) {
+            if (!isHtmlFile(droppedFile)) {
+                setError('Invalid file type. Please upload an .html file.');
+                return;
+            }
+            if (droppedFile.size > maxFileSize) {
+                setError(`File size exceeds the maximum limit of ${formatBytes(maxFileSize)}.`);
+                return;
+            }
             setFile({
                 ...initialFileProperties,
                 file: droppedFile,
                 name: droppedFile.name,
                 size: droppedFile.size,
             });
-            setShowDragArea(false); // Hide drag area after file drop
+            setShowDragArea(false);
         }
     }, []);
 
     const onFileChange = (e) => {
+        setError(''); // Reset any existing errors
         const selectedFile = e.target.files[0];
         if (selectedFile) {
+            if (!isHtmlFile(selectedFile)) {
+                setError('Invalid file type. Please upload an .html file.');
+                return;
+            }
+            if (selectedFile.size > maxFileSize) {
+                setError(`File size exceeds the maximum limit of ${formatBytes(maxFileSize)}.`);
+                return;
+            }
             setFile({
                 ...initialFileProperties,
                 file: selectedFile,
                 name: selectedFile.name,
                 size: selectedFile.size,
             });
-            setShowDragArea(false); // Hide drag area after file selection
+            setShowDragArea(false);
         }
     };
 
     const handleCancelUpload = () => {
         setFile(null);
         setShowDragArea(true);
+        setError(''); // Clear any errors when cancelling
     };
 
     useEffect(() => {
         if (file && !file.complete) {
+            const sizeMB = file.size / (1024 * 1024);
+            const totalTime = timePerMB * sizeMB;
+            const intervalTime = 200;
+            const totalIntervals = Math.ceil(totalTime / intervalTime);
+            const increment = 100 / totalIntervals;
+
             const interval = setInterval(() => {
                 setFile((prevFile) => {
                     if (prevFile && prevFile.progress < 100) {
-                        const increment = (10 / (prevFile.size / (1024 * 1024))) * (timePerMB / 200);
+                        const newProgress = prevFile.progress + increment;
                         return {
                             ...prevFile,
-                            progress: Math.min(prevFile.progress + increment, 100),
-                            complete: prevFile.progress + increment >= 100,
+                            progress: Math.min(newProgress, 100),
+                            complete: newProgress >= 100,
                         };
                     }
                     return prevFile;
                 });
-            }, 200);
+            }, intervalTime);
 
             return () => clearInterval(interval);
         }
     }, [file]);
 
     return (
-        <div style={containerStyle}>
+        <div className="container">
             {showDragArea && (
                 <div
                     className="drag-area"
-                    style={{ ...dragAreaStyle, ...(isHovered ? dragAreaHoverStyle : {}) }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onFileDrop}
                     onClick={() => document.getElementById('fileInput').click()}
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
                 >
-                    <img src={upload_icon} alt="Upload Icon" style={{ width: '60px', height: '60px' }} />
-                    <div style={purpleTagStyle}>
+                    <img
+                        src={upload_icon}
+                        alt="Upload Icon"
+                        className="upload-icon"
+                    />
+                    <div className="purple-tag">
                         <span>Click to Upload</span> or drag and drop
                     </div>
-                    <div style={maxSizeTextStyle}>
+                    <div className="max-size-text">
                         (Max. File size: {formatBytes(maxFileSize)})
                     </div>
                 </div>
@@ -183,18 +141,41 @@ const FileUpload = () => {
                 type="file"
                 id="fileInput"
                 onChange={onFileChange}
-                style={hiddenInputStyle}
+                className="hidden-input"
+                accept=".html, text/html" // Restrict file types in the dialog
             />
+            {error && (
+                <div className="error-message">
+                    {error}
+                </div>
+            )}
             {file && (
-                <div style={fileEntryStyle} className="meta-data-container">
-                    <button style={closeButtonStyle} onClick={handleCancelUpload}>X</button>
+                <div className="file-entry meta-data-container">
+                    {file.complete && (
+                        <button
+                            className="close-button"
+                            onClick={handleCancelUpload}
+                        >
+                            X
+                        </button>
+                    )}
                     {file.progress < 100 && (
-                        <progress value={file.progress} max="100" style={{ ...progressStyle, ...progressColorStyle }}></progress>
+                        <progress
+                            value={file.progress}
+                            max="100"
+                            className="progress progress-color"
+                        ></progress>
                     )}
                     {file.complete && (
-                        <div style={fileEntryTextStyle} className="meta-data-box">
-                            <img src={html_icon} alt="HTML Icon" style={{ width: '60px', height: '60px' }} />
-                            <div><strong>{file.name}</strong> - {formatBytes(file.size)}</div>
+                        <div className="file-entry-text meta-data-box">
+                            <img
+                                src={html_icon}
+                                alt="HTML Icon"
+                                className="html-icon"
+                            />
+                            <div>
+                                <strong>{file.name}</strong> - {formatBytes(file.size)}
+                            </div>
                         </div>
                     )}
                 </div>
