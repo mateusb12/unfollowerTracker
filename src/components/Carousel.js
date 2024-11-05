@@ -1,15 +1,17 @@
-// SimpleCarousel.js
 import React, { useState, useEffect } from 'react';
 
-const SimpleCarousel = ({ images, interval = 3000 }) => {
+const SimpleCarousel = ({ images, interval = 3000, autoPlay = false }) => {
     const [current, setCurrent] = useState(0);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrent((prev) => (prev + 1) % images.length);
-        }, interval);
+        let timer;
+        if (autoPlay) {
+            timer = setInterval(() => {
+                setCurrent((prev) => (prev + 1) % images.length);
+            }, interval);
+        }
         return () => clearInterval(timer);
-    }, [images.length, interval]);
+    }, [images.length, interval, autoPlay]);
 
     const prevSlide = () => {
         setCurrent((prev) => (prev === 0 ? images.length - 1 : prev - 1));

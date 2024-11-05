@@ -116,7 +116,7 @@ const FileUpload = () => {
     }, [file]);
 
     return (
-        <div className="container">
+        <div className="file-container">
             {showDragArea && (
                 <div
                     className="drag-area"

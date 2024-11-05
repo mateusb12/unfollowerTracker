@@ -1,12 +1,15 @@
 // UnfollowerTracker.js
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import html_icon from "../assets/img/html.svg";
 import FileUpload from "./FileUpload";
 import SimpleCarousel from "./Carousel"; // Ensure you have appropriate styles
-import slide1 from "../assets/img/slide1.png";
-import slide2 from "../assets/img/slide2.png";
-import slide3 from "../assets/img/slide3.png";
+import mobile1 from "../assets/img/mobile-step-1.jpg";
+import mobile2 from "../assets/img/mobile-step-2.jpg";
+import mobile3 from "../assets/img/mobile-step-3.jpg";
+import mobile4 from "../assets/img/mobile-step-4.jpg";
+import mobile5 from "../assets/img/mobile-step-5.jpg";
+import mobile6 from "../assets/img/mobile-step-6.jpg";
+import mobile7 from "../assets/img/mobile-step-7.jpg";
 
 const UnfollowerTracker = () => {
     const [uploadedFile, setUploadedFile] = useState(null);
@@ -29,9 +32,13 @@ const UnfollowerTracker = () => {
 
     // Dummy images
     const dummyImages = [
-        slide1,
-        slide2,
-        slide3,
+        mobile1,
+        mobile2,
+        mobile3,
+        mobile4,
+        mobile5,
+        mobile6,
+        mobile7
     ];
 
     return (
