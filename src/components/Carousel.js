@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const SimpleCarousel = ({ images, interval = 3000, autoPlay = false }) => {
     const [current, setCurrent] = useState(0);
+    const imgRef = useRef(null);
 
     useEffect(() => {
         let timer;
@@ -29,7 +30,13 @@ const SimpleCarousel = ({ images, interval = 3000, autoPlay = false }) => {
                         className={`carousel-item ${index === current ? 'active' : ''}`}
                         key={index}
                     >
-                        {index === current && <img src={img} alt={`Slide ${index + 1}`} />}
+                        {index === current && (
+                            <img
+                                src={img}
+                                alt={`Slide ${index + 1}`}
+                                ref={imgRef}
+                            />
+                        )}
                     </div>
                 ))}
             </div>

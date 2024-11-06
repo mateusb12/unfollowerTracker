@@ -16,6 +16,25 @@ const formatBytes = (bytes, decimals = 2) => {
     );
 };
 
+const extractInstagramData = (htmlContent) => {
+    // Create a temporary DOM element to parse the HTML string
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+
+    // Helper function to extract usernames based on a specific class name
+    const extractUsernames = (className) => {
+        return Array.from(tempElement.getElementsByClassName(className))
+            .map(div => div.querySelector('a')?.textContent.trim().replace('@', ''))
+            .filter(Boolean);
+    };
+
+    // Extract followers and following lists
+    const followers = extractUsernames('_a6-p');  // Replace with actual class name for followers
+    const following = extractUsernames('_a705');  // Replace with actual class name for following
+
+    return { followers, following };
+};
+
 const maxFileSize = 25 * 1024 * 1024; // Max file size in bytes (25 MB)
 const timePerMB = 5000;
 const initialFileProperties = {
@@ -113,6 +132,34 @@ const FileUpload = () => {
 
             return () => clearInterval(interval);
         }
+    }, [file]);
+
+    useEffect(() => {
+        // This effect runs when the file upload is complete
+        const processFile = async () => {
+            if (file && file.complete) {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const htmlContent = event.target.result;
+                        const instagramData = extractInstagramData(htmlContent);
+                        console.log('Followers:', instagramData.followers);
+                        console.log('Following:', instagramData.following);
+                        // You can also perform additional actions with the data here
+                    };
+                    reader.onerror = (event) => {
+                        console.error('Error reading file:', event.target.error);
+                        setError('Failed to read the uploaded file.');
+                    };
+                    reader.readAsText(file.file);
+                } catch (err) {
+                    console.error('An unexpected error occurred:', err);
+                    setError('An unexpected error occurred while processing the file.');
+                }
+            }
+        };
+
+        processFile();
     }, [file]);
 
     return (

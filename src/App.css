@@ -415,7 +415,7 @@ p.danger {
   overflow: hidden;
   border-radius: 8px;
   border: 1px white solid;
-  height: 600px;
+  /*height: 800px;*/
 }
 
 .carousel-item {
@@ -430,6 +430,7 @@ p.danger {
 .carousel-item img {
   width: 100%;
   height: auto;
+  display: block;
 }
 
 .prev-button, .next-button {
