@@ -10,6 +10,9 @@ import mobile4 from "../assets/img/mobile-step-4.jpg";
 import mobile5 from "../assets/img/mobile-step-5.jpg";
 import mobile6 from "../assets/img/mobile-step-6.jpg";
 import mobile7 from "../assets/img/mobile-step-7.jpg";
+import mobile8 from "../assets/img/mobile-step-8.jpg";
+import mobile9 from "../assets/img/mobile-step-9.jpg";
+import mobile10 from "../assets/img/mobile-step-10.jpg";
 
 const UnfollowerTracker = () => {
     const [uploadedFile, setUploadedFile] = useState(null);
@@ -38,7 +41,10 @@ const UnfollowerTracker = () => {
         mobile4,
         mobile5,
         mobile6,
-        mobile7
+        mobile7,
+        mobile8,
+        mobile9,
+        mobile10
     ];
 
     return (
