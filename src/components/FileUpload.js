@@ -260,11 +260,11 @@ const FileUpload = () => {
             )}
             {htmlFiles.length > 0 && (
                 <div className="html-files-list">
-                    <h3>Extracted HTML Files:</h3>
+                    <h3>Extracted HTML Files</h3>
                     <ul>
                         {htmlFiles.map((htmlFile, index) => (
                             <li key={index}>
-                                <strong>{htmlFile.name}</strong>
+                                <strong>{htmlFile.name.split('/').pop()}</strong>
                                 {/* Display or process the content as needed */}
                             </li>
                         ))}
