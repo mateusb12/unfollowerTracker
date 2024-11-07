@@ -332,8 +332,7 @@ p.danger {
   appearance: none;
 }
 
-.analyzeButton {
-  background-color: #4CAF50;
+.unfollowerTracker .analyzeButton {
   color: white;
   border: none;
   padding: 10px 20px;
@@ -345,8 +344,12 @@ p.danger {
   cursor: pointer;
 }
 
-.analyzeButton:disabled {
+.unfollowerTracker .analyzeButton:disabled {
   background-color: #ccc;
+}
+
+.unfollowerTracker .analyzeButton:enabled{
+  background-color: #4CAF50;
 }
 
 /************ FileUploader Css ************/

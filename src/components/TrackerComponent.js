@@ -1,5 +1,6 @@
 // UnfollowerTracker.js
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import html_icon from "../assets/img/html.svg";
 import FileUpload from "./FileUpload";
 import SimpleCarousel from "./Carousel"; // Ensure you have appropriate styles
@@ -23,9 +24,10 @@ const UnfollowerTracker = () => {
 
     const handleAnalyze = () => {
         if (uploadedFile && uploadedFile.complete) {
-            // Implement your analysis logic here using uploadedFile
             console.log('Analyze', uploadedFile);
-            // Example: Send the file to an API for processing
+            // Implement your analysis logic here
+        } else {
+            console.log('File is not complete:', uploadedFile);
         }
     };
 
@@ -47,28 +49,26 @@ const UnfollowerTracker = () => {
         mobile10
     ];
 
+    // Determine the state for the button
+    const analyzeButtonState = uploadedFile ? 'enabled' : 'disabled';
+
     return (
         <div className="unfollowerTracker">
             <h1 className="title">Unfollower Tracker</h1>
 
             {/* Carousel Section */}
-            <SimpleCarousel images={dummyImages} />
+            <SimpleCarousel images={dummyImages}/>
 
             {/* File Upload Section */}
-            <FileUpload onFileUploaded={handleFileUploaded} />
+            <FileUpload onFileUploaded={handleFileUploaded}/>
             {uploadedFile && (
                 <div className="uploaded-file-info">
-                    <img src={html_icon} alt="HTML Icon" className="html-icon-small" />
-                    <span className="file-name">{uploadedFile.name}</span>
-                    <button className="remove-button" onClick={handleRemoveFile}>
-                        Remove
-                    </button>
                 </div>
             )}
             <button
-                disabled={!uploadedFile || !uploadedFile.complete}
                 onClick={handleAnalyze}
-                className="analyzeButton"
+                className="analyzeButton" // Simplify className
+                disabled={!uploadedFile || !uploadedFile.complete} // Consider file completion
             >
                 Analyze
             </button>

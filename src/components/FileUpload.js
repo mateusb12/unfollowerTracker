@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import upload_icon from '../assets/img/upload-icon.svg';
 import JSZip from 'jszip';
 import zip_icon from '../assets/img/zip.png';
+import PropTypes from "prop-types";
 
 // Utility function to format bytes
 const formatBytes = (bytes, decimals = 2) => {
@@ -43,7 +44,7 @@ const initialFileProperties = {
     complete: false,
 };
 
-const FileUpload = () => {
+const FileUpload = ({ onFileUploaded }) => {
     const [file, setFile] = useState(null);
     const [showDragArea, setShowDragArea] = useState(true);
     const [error, setError] = useState(''); // State for error messages
@@ -142,6 +143,7 @@ const FileUpload = () => {
         // This effect runs when the file upload is complete
         const processZipFile = async () => {
             if (file && file.complete) {
+                onFileUploaded(file);
                 try {
                     const reader = new FileReader();
                     reader.onload = async (event) => {
@@ -191,7 +193,7 @@ const FileUpload = () => {
         };
 
         processZipFile();
-    }, [file]);
+    }, [file, onFileUploaded]);
 
     return (
         <div className="file-container">
@@ -273,6 +275,10 @@ const FileUpload = () => {
             )}
         </div>
     );
+};
+
+FileUpload.propTypes = {
+    onFileUploaded: PropTypes.func.isRequired, // Define prop type
 };
 
 export default FileUpload;
