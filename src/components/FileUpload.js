@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import upload_icon from '../assets/img/upload-icon.svg';
-import html_icon from '../assets/img/html.svg';
+import JSZip from 'jszip';
+import zip_icon from '../assets/img/zip.png';
 
 // Utility function to format bytes
 const formatBytes = (bytes, decimals = 2) => {
@@ -46,24 +47,26 @@ const FileUpload = () => {
     const [file, setFile] = useState(null);
     const [showDragArea, setShowDragArea] = useState(true);
     const [error, setError] = useState(''); // State for error messages
+    const [htmlFiles, setHtmlFiles] = useState([]); // State to store extracted HTML files
 
-    // Helper function to validate file type
-    const isHtmlFile = (file) => {
+    // Helper function to validate zip files
+    const isZipFile = (file) => {
         const fileType = file.type;
-        const fileName = file.name;
+        const fileName = file.name.toLowerCase();
         return (
-            fileType === 'text/html' ||
-            fileName.toLowerCase().endsWith('.html')
+            fileType === 'application/zip' ||
+            fileType === 'application/x-zip-compressed' ||
+            fileName.endsWith('.zip')
         );
     };
 
     const onFileDrop = useCallback((e) => {
         e.preventDefault();
-        setError(''); // Reset any existing errors
+        setError('');
         const droppedFile = e.dataTransfer.files[0];
         if (droppedFile) {
-            if (!isHtmlFile(droppedFile)) {
-                setError('Invalid file type. Please upload an .html file.');
+            if (!isZipFile(droppedFile)) {
+                setError('Invalid file type. Please upload a .zip file.');
                 return;
             }
             if (droppedFile.size > maxFileSize) {
@@ -81,11 +84,11 @@ const FileUpload = () => {
     }, []);
 
     const onFileChange = (e) => {
-        setError(''); // Reset any existing errors
+        setError('');
         const selectedFile = e.target.files[0];
         if (selectedFile) {
-            if (!isHtmlFile(selectedFile)) {
-                setError('Invalid file type. Please upload an .html file.');
+            if (!isZipFile(selectedFile)) {
+                setError('Invalid file type. Please upload a .zip file.');
                 return;
             }
             if (selectedFile.size > maxFileSize) {
@@ -104,8 +107,9 @@ const FileUpload = () => {
 
     const handleCancelUpload = () => {
         setFile(null);
+        setHtmlFiles([]);
         setShowDragArea(true);
-        setError(''); // Clear any errors when cancelling
+        setError('');
     };
 
     useEffect(() => {
@@ -136,22 +140,49 @@ const FileUpload = () => {
 
     useEffect(() => {
         // This effect runs when the file upload is complete
-        const processFile = async () => {
+        const processZipFile = async () => {
             if (file && file.complete) {
                 try {
                     const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const htmlContent = event.target.result;
-                        const instagramData = extractInstagramData(htmlContent);
-                        console.log('Followers:', instagramData.followers);
-                        console.log('Following:', instagramData.following);
-                        // You can also perform additional actions with the data here
+                    reader.onload = async (event) => {
+                        const arrayBuffer = event.target.result;
+                        const zip = await JSZip.loadAsync(arrayBuffer);
+                        const htmlFilesPromises = [];
+                        const desiredHtmlNames = ['followers', 'following'];
+
+                        zip.forEach((relativePath, zipEntry) => {
+                            const fileName = zipEntry.name.toLowerCase();
+                            const fileBaseName = fileName.split('/').pop();
+                            if (!desiredHtmlNames.some(keyword => fileBaseName.includes(keyword))) {
+                                return;
+                            }
+                            if (zipEntry.name.endsWith('.html')) {
+                                htmlFilesPromises.push(
+                                    zipEntry.async('string').then((content) => ({
+                                        name: zipEntry.name,
+                                        content,
+                                    }))
+                                );
+                            }
+                        });
+
+                        const extractedHtmlFiles = await Promise.all(htmlFilesPromises);
+                        setHtmlFiles(extractedHtmlFiles);
+
+                        // Process each HTML file as needed
+                        extractedHtmlFiles.forEach((file) => {
+                            const instagramData = extractInstagramData(file.content);
+                            // console.log(`File: ${file.name}`);
+                            // console.log('Followers:', instagramData.followers);
+                            // console.log('Following:', instagramData.following);
+                            // Additional processing if needed
+                        });
                     };
                     reader.onerror = (event) => {
                         console.error('Error reading file:', event.target.error);
                         setError('Failed to read the uploaded file.');
                     };
-                    reader.readAsText(file.file);
+                    reader.readAsArrayBuffer(file.file);
                 } catch (err) {
                     console.error('An unexpected error occurred:', err);
                     setError('An unexpected error occurred while processing the file.');
@@ -159,7 +190,7 @@ const FileUpload = () => {
             }
         };
 
-        processFile();
+        processZipFile();
     }, [file]);
 
     return (
@@ -189,7 +220,7 @@ const FileUpload = () => {
                 id="fileInput"
                 onChange={onFileChange}
                 className="hidden-input"
-                accept=".html, text/html" // Restrict file types in the dialog
+                accept=".zip, application/zip"
             />
             {error && (
                 <div className="error-message">
@@ -216,8 +247,8 @@ const FileUpload = () => {
                     {file.complete && (
                         <div className="file-entry-text meta-data-box">
                             <img
-                                src={html_icon}
-                                alt="HTML Icon"
+                                src={zip_icon}
+                                alt="ZIP Icon"
                                 className="html-icon"
                             />
                             <div>
@@ -225,6 +256,19 @@ const FileUpload = () => {
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+            {htmlFiles.length > 0 && (
+                <div className="html-files-list">
+                    <h3>Extracted HTML Files:</h3>
+                    <ul>
+                        {htmlFiles.map((htmlFile, index) => (
+                            <li key={index}>
+                                <strong>{htmlFile.name}</strong>
+                                {/* Display or process the content as needed */}
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>
